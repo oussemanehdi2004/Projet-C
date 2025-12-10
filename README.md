@@ -60,8 +60,8 @@ Conformément à la consigne *"Ajouter au minimum une autre tâche"*, deux fonct
 | **salles.txt** | Base de données des salles (Format : Nom Capacité Tarif {Equipements}). |
 | **reservations.txt** | Historique des réservations (Format : ID Client Salle DateDebut...). |
 | **factures.txt** | Registre cumulatif des factures générées pour les clients. |
-| **statistiques.txt** | 
-| **chiffres_affaires.txt** | 
+| **statistiques.txt** | Registre cumulatif statistiques. |
+| **chiffres_affaires.txt** | Historique de chiffres_affaires. |
 
 
 ---
@@ -76,7 +76,7 @@ Conformément à la consigne *"Ajouter au minimum une autre tâche"*, deux fonct
 1.  *Compilation :*
     Ouvrez un terminal dans le dossier du projet et exécutez :
     
-    gcc "PRO C-1.c" -o gestion_reservations
+    gcc "Projet.c" -o gestion_reservations
     
 
 
