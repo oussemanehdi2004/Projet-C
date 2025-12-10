@@ -367,6 +367,18 @@ void ajouterReservation() {
         return;
     }
 
+    int num_personnes;
+    printf("Nombre de personnes : ");
+    scanf("%d", &num_personnes);
+    if (num_personnes > salles[idx].capacite){
+        printf("\033[31m❌ Capacité insuffisante !\033[0m \n");
+        return;
+    }
+    if(num_personnes <=0){
+        printf("\033[31m❌ Nombre de personnes invalide !\033[0m \n");
+        return;
+    }
+
     char ds[20], ts[20], df[20], tf[20];
 
     printf("Date début (jj/mm/aaaa) : ");
@@ -592,7 +604,7 @@ void statistiques() {
     FILE *f = fopen("statistiques.txt", "w");
     if (!f) return;
 
-    fprintf(f, " ===== STATISTIQUES SYSTÈME ===== \n");
+    fprintf(f, "\033[34m ===== STATISTIQUES SYSTÈME =====\033[0m \n");
 
     float totalCA = 0;
     int maxRes = -1;
@@ -672,7 +684,7 @@ void mettreAJourChiffreAffaires(){
 
     float total=0;
 
-    fprintf(f,"===== CHIFFRE D'AFFAIRES =====\n");
+    fprintf(f," ===== CHIFFRE D'AFFAIRES ===== \n");
 
     for(int i=0;i<nb_salles;i++){
         float ca = 0;
@@ -694,7 +706,7 @@ void mettreAJourStatistiques() {
     FILE *f = fopen("statistiques.txt", "a");
     if (!f) return;
 
-    fprintf(f, " ===== NOUVELLE RÉSERVATION ===== \n");
+    fprintf(f, "\n ===== NOUVELLE RÉSERVATION ===== \n");
 
     int mois[13]={0};
     int max=0;
