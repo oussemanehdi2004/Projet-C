@@ -105,6 +105,6 @@ L'application propose un menu interactif numéroté :
 ## 👥 Auteurs
 * *Nehdi Oussema*
 * *Amar Mohamed*
-* * Saad Mohamed Aziz*
+* *Saad Mohamed Aziz*
 
 Projet réalisé à l'École Nationale des Sciences de l'Informatique (ENSI)
