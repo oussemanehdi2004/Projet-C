@@ -7,9 +7,8 @@
 #define MAX_RES 500
 #define MAX_EQUIPEMENTS 20
 
-/********************************************
- * STRUCTURES : DATE, TEMPS, EQUIPEMENTS, ...
- *******************************************/
+/* STRUCTURES DE DONNÉES */
+
 typedef struct {
     int jour, mois, annee;
 } Date;
@@ -51,17 +50,15 @@ typedef struct {
 
 } Reservation;
 
-/********************************************
- * VARIABLES GLOBALES
- *******************************************/
+/* VARIABLES GLOBALES */
+
 Salle salles[MAX_SALLES];
 Reservation reservations[MAX_RES];
 int nb_salles = 0;
 int nb_res = 0;
 
-/********************************************
- * UTILITAIRES DATES / HEURES
- *******************************************/
+/* FONCTIONS UTILITAIRES POUR DATES ET TEMPS */
+
 int estBissextile(int annee){
     if ((annee % 400) == 0) return 1;
     if ((annee % 100) == 0) return 0;
@@ -95,27 +92,15 @@ long differenceMinutes(Date d1, Temps t1, Date d2, Temps t2){
 }
 
 int estDateValide(int j, int m, int a) {
-    // 1. Vérifier si l'année est positive (ou dans une plage raisonnable)
     if (a < 1900 || a > 2100) return 0; 
-
-    // 2. Vérifier si le mois est entre 1 et 12
     if (m < 1 || m > 12) return 0; 
-
-    // 3. Vérifier si le jour est positif
     if (j < 1) return 0; 
-
-    // 4. Nombre de jours maximum par mois
     int joursDansMois[] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-
-    // Gestion de l'année bissextile pour Février
-    // Une année est bissextile si divisible par 4, sauf si divisible par 100 mais pas par 400
     if (m == 2) {
         if ((a % 4 == 0 && a % 100 != 0) || (a % 400 == 0)) {
             joursDansMois[2] = 29;
         }
     }
-
-    // 5. Vérifier si le jour dépasse le max du mois
     if (j > joursDansMois[m]) return 0;
 
     return 1; 
@@ -131,9 +116,7 @@ int estDansLeFutur(Date d, Temps t) {
     return diff >= 0;
 }
 
-/********************************************
- * GESTION EQUIPEMENTS
- *******************************************/
+/* AJOUTER ÉQUIPEMENT DANS SALLE */
 void ajouterEquipement(Salle *s, const char *cle, int quantite) {
     for (int i = 0; i < s->equipements.taille; i++) {
         if (strcmp(cle, s->equipements.items[i].cle) == 0) {
@@ -146,9 +129,8 @@ void ajouterEquipement(Salle *s, const char *cle, int quantite) {
     s->equipements.taille++;
 }
 
-/********************************************
- * INITIALISATION DES 10 SALLES PAR DÉFAUT
- *******************************************/
+/* INITIALISATION SALLES PAR DÉFAUT*/
+
 void initialiserSallesParDefaut(){
     nb_salles = 10;
 
@@ -226,13 +208,13 @@ void initialiserSallesParDefaut(){
     salles[9].equipements.taille = 0;
     ajouterEquipement(&salles[9], "ecrans_interactifs", 2);
     ajouterEquipement(&salles[9], "webcams", 2);
-}/********************************************
- * CHARGEMENT DES SALLES DEPUIS salles.txt
- *******************************************/
+}
+/* CHARGEMENT DES SALLES DEPUIS FICHIER salles.txt*/
+
 void chargerSalles() {
     FILE *f = fopen("salles.txt", "r");
     if (!f) {
-        printf("⚠️ Fichier salles.txt introuvable → utilisation des salles par défaut.\n");
+        printf("\033[31m⚠️ Fichier salles.txt introuvable → utilisation des salles par défaut.\033[0m\n");
         initialiserSallesParDefaut();
         return;
     }
@@ -240,7 +222,7 @@ void chargerSalles() {
     int count = 0;
     fscanf(f, "%d\n", &count);
     if (count <= 0 || count > MAX_SALLES) {
-        printf("⚠️ Fichier salles.txt corrompu → utilisation des salles par défaut.\n");
+        printf("\033[31m⚠️ Fichier salles.txt corrompu → utilisation des salles par défaut.\033[0m\n");
         fclose(f);
         initialiserSallesParDefaut();
         return;
@@ -270,9 +252,8 @@ void chargerSalles() {
     fclose(f);
 }
 
-/********************************************
- * INDEX SALLE
- *******************************************/
+/*RECHERCHE SALLE PAR NOM*/
+
 int indexSalle(const char *nom) {
     for (int i = 0; i < nb_salles; i++)
         if (strcmp(salles[i].nom, nom) == 0)
@@ -280,9 +261,8 @@ int indexSalle(const char *nom) {
     return -1;
 }
 
-/********************************************
- * DISPONIBILITÉ
- *******************************************/
+/*DISPONIBILITÉ*/
+
 int estDisponible(const char *nomSalle, Date d1, Temps t1, Date d2, Temps t2) {
 
     long startN = differenceMinutes((Date){1,1,0}, (Temps){0,0}, d1, t1);
@@ -307,9 +287,8 @@ int estDisponible(const char *nomSalle, Date d1, Temps t1, Date d2, Temps t2) {
     return 1;
 }
 
-/********************************************
- * FACTURE (avec durée F3)
- *******************************************/
+/*FACTURE (avec durée F3)*/
+
 void enregistrerFacture(Reservation r) {
 
     long dureeMin = differenceMinutes(r.debut_date, r.debut_temps,
@@ -337,9 +316,8 @@ void enregistrerFacture(Reservation r) {
     fclose(f);
 }
 
-/********************************************
- * CHARGEMENT DES RESERVATIONS EXISTANTES
- *******************************************/
+/* CHARGEMENT DES RESERVATIONS EXISTANTES*/
+
 void chargerReservations(){
     FILE *f = fopen("reservations.txt","r");
     if(!f) return;
@@ -365,15 +343,13 @@ void chargerReservations(){
     fclose(f);
 }
 
-/********************************************
- * MISE À JOUR CA & STATISTIQUES (déclarations)
- *******************************************/
+/* MISE À JOUR CA & STATISTIQUES (déclarations)*/
+
 void mettreAJourChiffreAffaires();
 void mettreAJourStatistiques();
 
-/********************************************
- * AJOUT RESERVATION
- *******************************************/
+/*AJOUT RESERVATION*/
+
 void ajouterReservation() {
 
     Reservation r;
@@ -387,7 +363,7 @@ void ajouterReservation() {
 
     int idx = indexSalle(r.salle);
     if (idx == -1) {
-        printf("❌ Salle introuvable !\n");
+        printf("\033[31m❌ Salle introuvable !\033[0m \n");
         return;
     }
 
@@ -399,16 +375,16 @@ void ajouterReservation() {
     if (sscanf(ds, "%d/%d/%d", &r.debut_date.jour, &r.debut_date.mois, &r.debut_date.annee) == 3) {
 
         if (estDateValide(r.debut_date.jour, r.debut_date.mois, r.debut_date.annee)) {
-            printf("Date valide enregistrée : %02d/%02d/%d\n",r.debut_date.jour, r.debut_date.mois, r.debut_date.annee);
+            printf("\033[32m Date valide enregistrée :\033[0m  %02d/%02d/%d\n",r.debut_date.jour, r.debut_date.mois, r.debut_date.annee);
 
             
         } else {
-            printf("Erreur : La date %s n'existe pas dans le calendrier.\n", ds);
+            printf("\033[31m Erreur : La date %s n'existe pas dans le calendrier.\033[0m \n", ds);
             return;
         }
 
     } else {
-        printf("Erreur : Format invalide. Veuillez utiliser jj/mm/aaaa.\n");
+        printf("\033[31m Erreur : Format invalide. Veuillez utiliser jj/mm/aaaa.\033[0m \n");
         return;
     }
 
@@ -419,15 +395,15 @@ void ajouterReservation() {
     if(sscanf(ts, "%d:%d", &r.debut_temps.heure, &r.debut_temps.minute) == 2){
         if(r.debut_temps.heure <0 || r.debut_temps.heure >23 ||
            r.debut_temps.minute <0 || r.debut_temps.minute >59){
-            printf("Erreur : Heure invalide.\n");
+            printf("\033[31m Erreur : Heure invalide.\033[0m \n");
             return;
         }
     } else {
-        printf("Erreur : Format invalide. Veuillez utiliser hh:mm.\n");
+        printf("\033[31m Erreur : Format invalide. Veuillez utiliser hh:mm.\033[0m \n");
         return;
     }
     if (!estDansLeFutur(r.debut_date, r.debut_temps)) {
-    printf("\n❌ Erreur : impossible de réserver dans le passé.\n");
+    printf("\n\033[31m ❌ Erreur : impossible de réserver dans le passé.\033[0m \n");
     return;
     }
 
@@ -437,16 +413,16 @@ void ajouterReservation() {
     if (sscanf(df, "%d/%d/%d", &r.fin_date.jour, &r.fin_date.mois, &r.fin_date.annee) == 3) {
 
         if (estDateValide(r.fin_date.jour, r.fin_date.mois, r.fin_date.annee)) {
-            printf("Date valide enregistrée : %02d/%02d/%d\n",r.fin_date.jour, r.fin_date.mois, r.fin_date.annee);
+            printf("\033[32m Date valide enregistrée :\033[0m  %02d/%02d/%d\n",r.fin_date.jour, r.fin_date.mois, r.fin_date.annee);
 
             
         } else {
-            printf("Erreur : La date %s n'existe pas dans le calendrier.\n", ds);
+            printf("\033[31m Erreur : La date %s n'existe pas dans le calendrier.\033[0m \n", ds);
             return;
         }
 
     } else {
-        printf("Erreur : Format invalide. Veuillez utiliser jj/mm/aaaa.\n");
+        printf("\033[31m Erreur : Format invalide. Veuillez utiliser jj/mm/aaaa.\033[0m \n");
         return;
     }
 
@@ -456,11 +432,11 @@ void ajouterReservation() {
     if(sscanf(tf, "%d:%d", &r.fin_temps.heure, &r.fin_temps.minute) == 2){
         if(r.fin_temps.heure <0 || r.fin_temps.heure >23 ||
            r.fin_temps.minute <0 || r.fin_temps.minute >59){
-            printf("Erreur : Heure invalide.\n");
+            printf("\033[31m Erreur : Heure invalide.\033[0m \n");
             return;
         }
     } else {
-        printf("Erreur : Format invalide. Veuillez utiliser hh:mm.\n");
+        printf("\033[31m Erreur : Format invalide. Veuillez utiliser hh:mm.\033[0m \n");
         return;
     }
 
@@ -468,18 +444,18 @@ void ajouterReservation() {
     long duree = differenceMinutes(r.debut_date, r.debut_temps,r.fin_date, r.fin_temps);
 
     if (duree <= 0) {
-        printf("❌ Erreur : fin avant début.\n");
+        printf("\033[31m ❌ Erreur : fin avant début.\033[0m \n");
         strcpy(r.statut, "refuse");
     }
     else if (!estDisponible(r.salle, r.debut_date, r.debut_temps, r.fin_date, r.fin_temps)) {
 
-        printf("❌ Créneau occupé !\n");
+        printf("❌\033[31m  Créneau occupé !\033[0m \n");
         strcpy(r.statut, "refuse");
     }
     else {
         strcpy(r.statut, "confirme");
         r.prix_total = (duree / 60.0) * salles[idx].tarif_horaire;
-        printf("✔ Réservation confirmée : %.2f DT\n", r.prix_total);
+        printf("\033[32m ✔ Réservation confirmée :\033[0m  %.2f DT\n", r.prix_total);
         enregistrerFacture(r);
     }
 
@@ -500,9 +476,10 @@ void ajouterReservation() {
 
     mettreAJourChiffreAffaires();
     mettreAJourStatistiques();
-}/********************************************
- * AJOUT DES 5 RESERVATIONS PAR DÉFAUT (une seule fois)
- *******************************************/
+}
+
+/*AJOUT DES 5 RESERVATIONS PAR DÉFAUT (une seule fois)*/
+
 void ajouterReservationsParDefautSiFichierVide() {
 
     FILE *f = fopen("reservations.txt", "r");
@@ -562,9 +539,7 @@ void ajouterReservationsParDefautSiFichierVide() {
     }
 }
 
-/********************************************
- * AFFICHAGE FACTURE PAR RECHERCHE
- *******************************************/
+/*AFFICHAGE FACTURE PAR RECHERCHE*/
 void afficherFactureParInfos() {
 
     char nom[50], salleNom[50], ds[20], ts[20];
@@ -597,7 +572,7 @@ void afficherFactureParInfos() {
             r->debut_temps.heure == t.heure &&
             r->debut_temps.minute == t.minute) {
 
-            printf("\n=== FACTURE TROUVÉE ===\n");
+            printf("\n\033[34m === FACTURE TROUVÉE ===\033[0m \n");
             printf("Client : %s\n", r->nom_client);
             printf("Salle  : %s\n", r->salle);
             printf("Prix   : %.2f DT\n", r->prix_total);
@@ -607,18 +582,17 @@ void afficherFactureParInfos() {
         }
     }
 
-    printf("❌ Aucune facture trouvée.\n");
+    printf("\033[31m ❌ Aucune facture trouvée.\033[0m \n");
 }
 
-/********************************************
- * STATISTIQUES (mode complet — écrasement)
- *******************************************/
+/*STATISTIQUES (mode complet — écrasement)*/
+
 void statistiques() {
 
     FILE *f = fopen("statistiques.txt", "w");
     if (!f) return;
 
-    fprintf(f, "===== STATISTIQUES SYSTÈME =====\n");
+    fprintf(f, " ===== STATISTIQUES SYSTÈME ===== \n");
 
     float totalCA = 0;
     int maxRes = -1;
@@ -669,11 +643,10 @@ void statistiques() {
     printf("Statistiques mises à jour.\n");
 }
 
-/********************************************
- * AFFICHAGE CHIFFRE D'AFFAIRES PAR SALLE
- *******************************************/
+/* AFFICHAGE CHIFFRE D'AFFAIRES PAR SALLE*/
+
 void afficherChiffreAffaireParSalle(){
-    printf("\n===== CHIFFRE D'AFFAIRES PAR SALLE =====\n");
+    printf("\n\033[34m ===== CHIFFRE D'AFFAIRES PAR SALLE =====\033[0m \n");
 
     float totalCA = 0;
 
@@ -691,9 +664,8 @@ void afficherChiffreAffaireParSalle(){
     printf("TOTAL : %.2f DT\n", totalCA);
 }
 
-/********************************************
- * MISE À JOUR TEMPORAIRE (append)
- *******************************************/
+/*MISE À JOUR TEMPORAIRE (append)*/
+
 void mettreAJourChiffreAffaires(){
     FILE *f = fopen("chiffre_affaires.txt","w");
     if(!f) return;
@@ -717,14 +689,12 @@ void mettreAJourChiffreAffaires(){
     fclose(f);
 }
 
-/********************************************
- * MISE À JOUR STATISTIQUES (append)
- *******************************************/
+/*MISE À JOUR STATISTIQUES (append)*/
 void mettreAJourStatistiques() {
     FILE *f = fopen("statistiques.txt", "a");
     if (!f) return;
 
-    fprintf(f, "\n===== NOUVELLE RÉSERVATION =====\n");
+    fprintf(f, " ===== NOUVELLE RÉSERVATION ===== \n");
 
     int mois[13]={0};
     int max=0;
@@ -761,12 +731,10 @@ void mettreAJourStatistiques() {
     fclose(f);
 }
 
-/********************************************
- * AJOUT SALLE + CATALOGUE
- *******************************************/
+/*AJOUT SALLE + CATALOGUE*/
 void ajouterSalle() {
     if (nb_salles >= MAX_SALLES) {
-        printf("❌ Limite atteinte.\n");
+        printf("\033[31m ❌ Limite atteinte.\033[0m \n");
         return;
     }
 
@@ -824,25 +792,23 @@ void ajouterSalle() {
 
     fclose(f);
 
-    printf("✔ Salle ajoutée et sauvegardée avec succès.\n");
+    printf("\033[32m ✔ Salle ajoutée et sauvegardée avec succès.\033[0m \n");
 }
 
-/********************************************
- * AFFICHAGE CATALOGUE DES SALLES
- *******************************************/
+/* AFFICHAGE CATALOGUE DES SALLES*/
 
 void afficherCatalogue() {
-    printf("\n===== CATALOGUE DES SALLES =====\n");
+    printf("\n\033[34m ===== CATALOGUE DES SALLES =====\033[0m \n");
 
     FILE *f = fopen("salles.txt", "r");
     if (!f) {
-        printf("⚠️ Fichier salles.txt introuvable. Aucun catalogue disponible.\n");
+        printf("⚠️\033[31m  Fichier salles.txt introuvable. Aucun catalogue disponible.\033[0m \n");
         return;
     }
 
     int totalSalles = 0;
     if (fscanf(f, "%d\n", &totalSalles) != 1 || totalSalles <= 0) {
-        printf("⚠️ Fichier salles.txt corrompu.\n");
+        printf("⚠️\033[31m  Fichier salles.txt corrompu.\033[0m \n");
         fclose(f);
         return;
     }
@@ -884,9 +850,7 @@ void afficherCatalogue() {
 }
 
 
-/********************************************
- * ⭐ RECHERCHE PAR CAPACITÉ (F1)
- *******************************************/
+/*⭐ RECHERCHE PAR CAPACITÉ (F1)*/
 void rechercherParCapacite(){
     int cap;
     printf("Capacité minimum recherchée : ");
@@ -904,12 +868,10 @@ void rechercherParCapacite(){
     }
 
     if(!trouve)
-        printf("❌ Aucune salle trouvée.\n");
+        printf("\033[31m❌ Aucune salle trouvée.\033[0m\n");
 }
 
-/********************************************
- * ⭐ RECHERCHE PAR ÉQUIPEMENT (F2)
- *******************************************/
+/* ⭐ RECHERCHE PAR ÉQUIPEMENT (F2)*/
 void rechercherParEquipement(){
     char eq[50];
     printf("Nom équipement : ");
@@ -931,18 +893,16 @@ void rechercherParEquipement(){
     }
 
     if(!trouve)
-        printf("❌ Aucun résultat.\n");
+        printf("\033[31m ❌ Aucun résultat.\033[0m \n");
 }
 
-/********************************************
- * MENU PRINCIPAL
- *******************************************/
+/* MENU PRINCIPAL*/
 void menu() {
 
     int choix;
 
     do {
-       printf("\n \033[31m===== Sélectionner Votre Commande =====  \n \033[0m\n");
+       printf("\n \033[34m===== Sélectionner Votre Commande =====  \n \033[0m\n");
         printf("1. Ajouter une salle\n");
         printf("2. Voir catalogue\n");
         printf("3. Ajouter une réservation\n");
@@ -972,16 +932,14 @@ void menu() {
     } while (choix != 9);
 }
 
-/********************************************
- * MAIN PROGRAMME
- *******************************************/
+/*MAIN PROGRAMME*/
 int main() {
 
     chargerSalles();
     chargerReservations();
     ajouterReservationsParDefautSiFichierVide();
 
-    printf("\n=== SYSTEME DE RESERVATION CHARGÉ ===\n");
+    printf("\n\033[34m=== SYSTEME DE RESERVATION CHARGÉ ===\033[0m\n");
     printf("%d salles disponibles.\n", nb_salles);
     printf("%d réservations chargées.\n", nb_res);
 
